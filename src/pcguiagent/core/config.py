@@ -7,7 +7,8 @@ import os
 class LLMConfig:
     provider: str
     model: str
-    api_key: str
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
     temperature: float = 0.2
     max_tokens: int = 2048
 

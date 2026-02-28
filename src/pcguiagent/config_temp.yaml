@@ -9,9 +9,10 @@
 
 # LLM Configuration
 llm:
-  provider: "deepseek"  # Options: "deepseek", "openai", "doubao"
+  provider: "deepseek"  # Options: "deepseek", "openai", "local"
   model: "deepseek-chat"
-  api_key: null  # Set your API key here or via environment variable
+  api_key: null  # deepseek/openai/local(optional)
+  base_url: null  # local推荐: http://127.0.0.1:11434/v1 (Ollama) 或 http://127.0.0.1:8000/v1 (vLLM)
   temperature: 0.2
   max_tokens: 2048
 

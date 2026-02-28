@@ -6,8 +6,7 @@ from typing import Optional, Dict, Any
 from pcguiagent.core.config import Config
 from pcguiagent.utils.config_loader import find_config_file
 from pcguiagent.llms.base_client import BaseLLMClient
-from pcguiagent.llms.deepseek_client import DeepSeekClient
-from pcguiagent.llms.openai_client import OpenAIClient
+from pcguiagent.llms.factory import build_llm_client
 
 from pcguiagent.memory.storage import MemoryStorage
 
@@ -186,15 +185,4 @@ class Bootstrap:
     # Private helpers
     # ---------------------------------
     def _build_llm(self) -> BaseLLMClient:
-        provider = self.config.llm.provider
-
-        if provider == "deepseek":
-            return DeepSeekClient(
-                api_key=self.config.llm.api_key,
-                model=self.config.llm.model,
-            )
-        else:
-            return OpenAIClient(
-                api_key=self.config.llm.api_key,
-                model=self.config.llm.model,
-            )
+        return build_llm_client(self.config.llm)
