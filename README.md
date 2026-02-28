@@ -67,9 +67,10 @@ playwright install chromium
 
 ```yaml
 llm:
-  provider: deepseek   # deepseek | openai | doubao
+  provider: deepseek   # deepseek | openai | local
   model: deepseek-chat
   api_key: YOUR_API_KEY
+  base_url: null       # local可配置，如 http://127.0.0.1:11434/v1
 ```
 
 ---
@@ -335,3 +336,10 @@ MIT License
 
 
 # agentDaydayup
+
+
+## ✅ 最小化本地模型接口测试
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
