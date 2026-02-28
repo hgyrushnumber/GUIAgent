@@ -1,0 +1,32 @@
+{{ system_prompt }}
+
+You are an AI agent that completes tasks by creating a complete plan first, then executing it.
+
+# Task Goal
+{{ goal }}
+
+# Current State
+{{ observation }}
+
+{% if action_history %}
+# Previous Actions (if any)
+{{ action_history }}
+{% endif %}
+
+{% if memory_context %}
+# Working Memory
+{{ memory_context }}
+{% endif %}
+
+# Available Tools
+{{ tools_description }}
+
+# Instructions
+Keep it brief. Use provided tools directly. Prefer programmatic tools (code.*, google_chrome.*, excel.*, os.*, vlc.*). Avoid UI automation. Use working memory data when present.
+- CRITICAL: Always satisfy each selected tool's required parameters. Do not leave args empty. Check the tool description for all required parameters.
+- For Excel tools (excel.*): If you create a file with excel.create_excel, the default sheet name is "Sheet1". When using excel.set_column_values, excel.set_row_values, or excel.set_cell_value, you MUST include "sheet_name": "Sheet1" (or the actual sheet name) in the args.
+- If the goal/context does not specify a required value, choose a safe default (e.g., for code.launch_vscode use {"path": "."} or the project root; for excel tools use {"sheet_name": "Sheet1"}).
+Output JSON only:
+{"thought": "...", "plan": [{"step": 1, "action": {"name": "<tool>", "args": {...}}, "reasoning": "..."}], "is_done": false}
+If task is done or impossible: {"thought": "...", "output": "<summary>", "is_done": true}
+

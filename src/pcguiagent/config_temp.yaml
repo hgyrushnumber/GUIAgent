@@ -1,0 +1,68 @@
+# PC GUI Agent Configuration (OSWorld mode with OCR support)
+# Template configuration file - copy this to config.yaml and fill in your API keys
+#
+# 此配置针对 OSWorld 的决策模式：
+# - OSWorld 提供环境感知（Screenshot、a11y_tree）
+# - Agent 使用 a11y_tree + OCR（如果启用）进行决策
+# - OCR 从 screenshot 中提取准确的文本和坐标信息
+# - Agent 返回 pyautogui action 字符串，不执行 action
+
+# LLM Configuration
+llm:
+  provider: "deepseek"  # Options: "deepseek", "openai", "doubao"
+  model: "deepseek-chat"
+  api_key: null  # Set your API key here or via environment variable
+  temperature: 0.2
+  max_tokens: 2048
+
+# Memory Configuration
+memory:
+  short_term_limit: 10
+  episodic_limit: 100
+  long_term_limit: 100
+
+# Agent Configuration
+agent:
+  max_steps: 30
+  # Note: allow_self_repair is not used in OSWorld mode (Agent only returns actions, doesn't execute)
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  file: null  # Optional: path to log file
+
+# Note: Observability configuration is deprecated (observability module has been removed)
+# The observability section is kept for backward compatibility but is not used
+
+# OCR Configuration (for screenshot text recognition)
+# 使用阿里云 OCR API 从 screenshot 中提取文本和坐标信息
+ocr:
+  enabled: true  # 是否启用 OCR
+  provider: "aliyun"  # OCR 提供商
+  access_key_id: null  # 如果为 null，将从环境变量 ALIYUN_ACCESS_KEY_ID 读取
+  access_key_secret: null  # 如果为 null，将从环境变量 ALIYUN_ACCESS_KEY_SECRET 读取
+  endpoint: "ocr-api.cn-hangzhou.aliyuncs.com"  # OCR API 端点
+
+# Tool embedding (for prompt tool过滤)
+# 使用 DashScope/百炼 Embedding API（通过 llama_index）
+tools_embedding:
+  enabled: true
+  # API 模式配置
+  api_provider: "dashscope"  # 当前支持: "dashscope"
+  api_model: "text-embedding-v2"  # DashScope Embedding 模型名称
+  # api_key: null  # 如果为 null，将从环境变量 DASHSCOPE_API_KEY 读取
+  top_k: 15  # 减少 top_k，因为还会添加基础工具
+  similarity_threshold: 0.15  # 相似度阈值，降低以适应中英文混合查询（原0.20）
+  translate_query: true  # 是否将中文查询翻译为英文（提高工具检索准确性）
+  max_basic_tools: 8  # 最多添加的基础工具数量（增加以包含更多工具类别）
+  include_basic_prefixes:
+    # OSWorld 模式下不需要 "ui."，OSWorld 提供环境感知，只使用 os.* 工具
+    - "os."
+    - "google_chrome."  # 浏览器工具前缀
+    - "code."  # 代码工具前缀
+  # 核心基础工具列表（优先添加这些，即使不在 top_k 中）
+  essential_tools:
+    - "os.open_shell"
+    # OSWorld 模式下不需要 "os.get_axtree"，OSWorld 已经提供 a11y_tree
+    - "google_chrome.chrome_open_tabs_setup"  # 浏览器启动工具
+

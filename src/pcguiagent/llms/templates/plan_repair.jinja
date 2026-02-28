@@ -1,0 +1,31 @@
+{{ system_prompt }}
+
+You previously generated an invalid JSON plan for an OSWorld agent.
+
+Here is your invalid output:
+{{ invalid_output }}
+
+Available tools:
+{{ tools_description }}
+
+You MUST now convert this into a VALID JSON object with one of the following schemas:
+
+1) Final answer:
+{
+  "thought": "<your reasoning>",
+  "output": "<final answer>",
+  "is_done": true
+}
+
+2) Execute one action:
+{
+  "thought": "<your reasoning>",
+  "action": {
+    "name": "<one of: {{ tool_names }}>",
+    "args": { ... }
+  },
+  "is_done": false
+}
+
+Only output the corrected JSON. No explanation.
+

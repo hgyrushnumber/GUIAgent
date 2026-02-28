@@ -1,0 +1,79 @@
+{{ system_prompt }}
+
+You are repairing ONLY the current step of an existing multi-step plan. The previous attempt at this step failed or needs adjustment.
+
+# Task Goal
+{{ goal }}
+
+# Observation / Error Context
+{{ observation }}
+{% if error_info %}
+{{ error_info }}
+{% endif %}
+
+# Plan Context
+**Current step to fix (this is what failed or needs adjustment):**
+{{ current_step }}
+
+**Previous steps (already executed successfully, do NOT change):**
+{{ previous_steps }}
+
+**Remaining steps (keep them aligned, do NOT change):**
+{{ remaining_steps }}
+
+{% if memory_context %}
+# Working Memory
+{{ memory_context }}
+{% endif %}
+
+# Available Tools
+{{ tools_description }}
+
+# Instructions
+1. **Analyze why the current step failed:**
+   - Check the error message and observation context
+   - Identify if it's a parameter issue, wrong tool, timing issue, or other problem
+   - **If the error mentions "Missing required argument" or "Missing required parameter", you MUST include ALL required parameters in the args**
+   - **For Excel tools: If you see "sheet_name" missing, add "sheet_name": "Sheet1" to the args (new files use "Sheet1" as default)**
+   - **If UI automation failed, consider using direct tools instead** (e.g., `code.list_extensions` instead of `uiautomation.extract_ui_tree`)
+
+2. **Fix ONLY the current step:**
+   - Adjust parameters if needed
+   - **Change tool if current tool is inappropriate - prefer direct tools over UI automation**
+   - Add wait/retry logic if it's a timing issue
+   - Use data from Working Memory if the step needs data that's already available
+   - **If step involves VSCode/Chrome operations, check if direct tools (code.*, google_chrome.*) are available**
+
+3. **Keep the plan structure intact:**
+   - Do NOT regenerate the full plan
+   - Do NOT change previous or remaining steps
+   - Only return the fixed action for the current step
+
+4. **Tool Selection Rules (STRICTLY ENFORCED):**
+   - **DO NOT use UI automation tools (`uiautomation.*`) - they are DISABLED**
+   - **ONLY use MCP-provided tools**: `code.*`, `google_chrome.*`, `excel.*`, `os.*`, `vlc.*`
+   - For VSCode: Use `code.*` tools (MCP tools)
+   - For Chrome: Use `google_chrome.*` tools (MCP tools)
+   - **NEVER use `uiautomation.*` tools - they are not allowed**
+
+5. **How to use Working Memory:**
+   - If Working Memory contains JSON with "working_memory" field, parse it
+   - Access data: `working_memory["tool_name"]` to get results from previous tools
+   - Use this data in your action args when needed (e.g., for Excel operations)
+
+6. **Return ONLY valid JSON:**
+{
+  "thought": "<brief reasoning explaining why the step failed and how you're fixing it>",
+  "action": {
+    "name": "<tool_name from available tools: {{ tool_names }}>",
+    "args": {"<param1>": "<value1>", ...}
+  },
+  "is_done": false
+}
+
+CRITICAL:
+- **DO NOT use any `uiautomation.*` tools - they are DISABLED. Only use MCP tools (code.*, excel.*, os.*, google_chrome.*, vlc.*)**
+- Output ONLY the JSON object. No markdown, no code blocks, no explanations outside JSON.
+- Make sure the action name matches exactly one of the available MCP tools (NOT uiautomation.*).
+- The "thought" should explain what went wrong and how you're fixing it.
+
